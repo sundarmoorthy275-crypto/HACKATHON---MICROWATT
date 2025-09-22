@@ -41,6 +41,3 @@ This project aims to design and integrate a **SERDES block with the Microwatt CP
    - FPGA-to-FPGA communication test for data transfer.  
    - Latency and throughput measurement to validate performance.
 
-
-
-## 🏗️ Architecture

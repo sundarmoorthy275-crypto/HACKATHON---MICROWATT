@@ -1,75 +1,46 @@
-# OpenFrame Overview
+# Microwatt + SERDES High-Speed Link
 
-The OpenFrame Project provides an empty harness chip that differs significantly from the Caravel and Caravan designs. Unlike Caravel and Caravan, which include integrated SoCs and additional features, OpenFrame offers only the essential padframe, providing users with a clean slate for their custom designs.
+## 📌 Overview
+The **Microwatt + SERDES High-Speed Link** project extends the [Microwatt](https://github.com/antonblanchard/microwatt) open-source PowerISA CPU by integrating a **Serializer/Deserializer (SERDES)** block.  
+This enables **multi-Gbps chip-to-chip communication**, addressing the limitations of parallel buses such as high pin count, skew, and signal integrity issues.  
+The project demonstrates a custom FPGA interconnect bus using SERDES.
 
-<img width="256" alt="Screenshot 2024-06-24 at 12 53 39 PM" src="https://github.com/efabless/openframe_timer_example/assets/67271180/ff58b58b-b9c8-4d5e-b9bc-bf344355fa80">
+---
 
-## Key Characteristics of OpenFrame
+## 📝 Problem Statement
+Microwatt currently lacks a high-speed serial communication interface. Parallel buses are limited by:  
+- Excessive pin count for wide data buses.  
+- Clock skew and synchronization challenges at high frequency.  
+- Signal integrity degradation over long distances.  
 
-1. **Minimalist Design:** 
-   - No integrated SoC or additional circuitry.
-   - Only includes the padframe, a power-on-reset circuit, and a digital ROM containing the 32-bit project ID.
+These limitations make it difficult to achieve **high-speed chip-to-chip communication** or multi-core SoC interconnects. Incorporating a SERDES interface solves these issues by converting parallel data into high-speed serial streams, enabling reliable, scalable, and efficient data transfer.
 
-2. **Padframe Compatibility:**
-   - The padframe design and pin placements match those of the Caravel and Caravan chips, ensuring compatibility and ease of transition between designs.
-   - Pin types are identical, with power and ground pins positioned similarly and the same power domains available.
+---
 
-3. **Flexibility:**
-   - Provides full access to all GPIO controls.
-   - Maximizes the user project area, allowing for greater customization and integration of alternative SoCs or user-specific projects at the same hierarchy level.
+## 🎯 Project Proposal
+This project aims to design and integrate a **SERDES block with the Microwatt CPU core** to enable **high-speed chip-to-chip communication** for FPGA or SoC applications.  
 
-4. **Simplified I/O:**
-   - Pins that previously connected to CPU functions (e.g., flash controller interface, SPI interface, UART) are now repurposed as general-purpose I/O, offering flexibility for various applications.
+### Objectives
+- Design a functional SERDES IP core with serializer, deserializer, and clock recovery.  
+- Integrate the SERDES block into the Microwatt SoC via memory-mapped registers.  
+- Demonstrate stable FPGA-to-FPGA communication at multi-Gbps rates.  
+- Provide an open-source, reusable IP for research and education.
 
-The OpenFrame harness is ideal for those looking to implement custom SoCs or integrate user projects without the constraints of an existing SoC.
+### Methodology
+1. **SERDES Design**  
+   - Build serializer and deserializer modules.  
+   - Implement clock multiplication (PLL) and clock recovery (CDR).  
+   - Add optional encoding/decoding (8b/10b) and error checking.  
 
-## Features
+2. **Integration with Microwatt**  
+   - Connect SERDES as a peripheral on the Microwatt bus.  
+   - Provide control and status registers for configuration and monitoring.  
 
-1. 44 configurable GPIOs.
-2. User area of approximately 15mm².
-3. Supports digital, analog, or mixed-signal designs.
+3. **Testing & Validation**  
+   - Loopback testing for bit error rate (BER).  
+   - FPGA-to-FPGA communication test for data transfer.  
+   - Latency and throughput measurement to validate performance.
 
-# openframe_timer_example
 
-This example implements a simple timer and connects it to the GPIOs.
 
-## Installation and Setup
-
-First, clone the repository:
-
-```bash
-git clone https://github.com/efabless/openframe_timer_example.git
-cd openframe_timer_example
-```
-
-Then, download all dependencies:
-
-```bash
-make setup
-```
-
-## Hardening the Design
-
-In this example, we will harden the timer. You will need to harden your own design similarly.
-
-```bash
-make user_proj_timer
-```
-
-Once you have hardened your design, integrate it into the OpenFrame wrapper:
-
-```bash
-make openframe_project_wrapper
-```
-
-## Important Notes
-
-1. **Connecting to Power:**
-   - Ensure your design is connected to power using the power pins on the wrapper.
-   - Use the `vccd1_connection` and `vssd1_connection` macros, which contain the necessary vias and nets for power connections.
-
-2. **Flattening the Design:**
-   - If you plan to flatten your design within the `openframe_project_wrapper`, do not buffer the analog pins using standard cells.
-
-3. **Running Custom Steps:**
-   - Execute the custom step in OpenLane that copies the power pins from the template DEF. If this step is skipped, the precheck will fail, and your design will not be powered.
+## 🏗️ Architecture
